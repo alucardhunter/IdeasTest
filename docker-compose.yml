@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: product_ideas
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend-node:
+    build: ./backend-node
+    environment:
+      DATABASE_URL: postgres://postgres:123456@postgres:5432/product_ideas
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+
+  backend-php:
+    build: ./backend-php
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: product_ideas
+      DB_USERNAME: postgres
+      DB_PASSWORD: 123456
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_BASE: http://localhost:4000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend-node
+
+volumes:
+  postgres_data:
