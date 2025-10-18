@@ -10,4 +10,4 @@ Instructions (after placing into a Laravel project or running composer install):
 4. php artisan migrate --seed
 5. php artisan serve --host=0.0.0.0 --port=8000
 
-Swagger UI available at: http://localhost:8000/docs (serves swagger.yaml)
+Swagger UI available at: http://localhost:8000/api/docs (serves /api/swagger.yaml)

@@ -21,7 +21,7 @@ Short, focused guidance so an AI coding assistant can be productive immediately 
    - Lightweight controllers: controller functions return JSON and use `prisma` directly from `backend-node/src/prismaClient.ts` (mocked in tests). Follow patterns in `ideasController.ts` (list, create, get, vote, addComment).
    - Routes register controllers directly; prefer adding new endpoints under `backend-node/src/routes/` and a matching controller in `controllers/`.
    - Error handling is rudimentary—use status codes + small JSON `{ error: 'message' }` as existing handlers do (see `ideasController.ts`). Match this style for consistency.
-   - Swagger UI is served if `backend-node/swagger.yaml` exists; place API docs there. See `backend-node/src/app.ts` for integration.
+     - Swagger UI is served if `backend-node/swagger.yaml` exists; the UI is exposed at `/api/docs` and the raw YAML at `/api/swagger.yaml`. See `backend-node/src/app.ts` for integration.
 
 4. Integrations & external dependencies
 
