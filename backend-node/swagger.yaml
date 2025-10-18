@@ -1,0 +1,319 @@
+openapi: 3.0.1
+info:
+  title: Ideas API
+  version: 1.0.0
+  description: |
+    API simples para gerenciar ideias, votos e comentários.
+    Endpoint usado pelo frontend React (Vite) em `frontend/src/api/api.ts`.
+  contact:
+    name: Project Owner
+    url: https://example.local/
+  x-logo:
+    url: https://raw.githubusercontent.com/alucardhunter/IdeasTest/master/.github/logo.png
+    backgroundColor: "#FFFFFF"
+    altText: IdeasTest Logo
+servers:
+  - url: http://localhost:4000
+    description: Local development server
+tags:
+  - name: Ideas
+    description: Endpoints para listar, criar e interagir com ideias
+  - name: Users
+    description: Endpoints relacionados a usuários
+externalDocs:
+  description: Project README
+  url: ../README.md
+paths:
+  /ideas:
+    get:
+      tags: [Ideas]
+      summary: Lista todas as ideias
+      description: Retorna todas as ideias com contagem de votos e comentários.
+      responses:
+        "200":
+          description: Lista de ideias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IdeaSummary"
+    post:
+      tags: [Ideas]
+      summary: Cria uma nova ideia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewIdea"
+            example:
+              title: "Melhorar onboarding"
+              description: "Adicionar tutorial interativo"
+              createdBy: 1
+      responses:
+        "201":
+          description: Idea criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Idea"
+        "400":
+          description: Campos obrigatórios faltando
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /ideas/{id}:
+    get:
+      tags: [Ideas]
+      summary: Obtém os detalhes de uma ideia
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Detalhes da ideia
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdeaFull"
+        "404":
+          description: Idea não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /ideas/{id}/vote:
+    post:
+      tags: [Ideas]
+      summary: Votar em uma ideia
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId:
+                  type: integer
+      responses:
+        "201":
+          description: Voto registrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vote"
+        "400":
+          description: Requisição inválida (por exemplo, usuário já votou)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /ideas/{id}/comments:
+    post:
+      tags: [Ideas]
+      summary: Adiciona um comentário à ideia
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewComment"
+            example:
+              userId: 1
+              message: "Concordo, ótima ideia"
+      responses:
+        "201":
+          description: Comentário adicionado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "400":
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /users:
+    get:
+      tags: [Users]
+      summary: Lista usuarios
+      description: Retorna todos os usuários cadastrados (usado pelo frontend para selecionar `createdBy`)
+      responses:
+        "200":
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: "missing fields"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+      required: [id, name, email]
+      example:
+        id: 1
+        name: Alice
+        email: a@x
+
+    NewIdea:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        createdBy:
+          type: integer
+      required: [title, description, createdBy]
+
+    Idea:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        createdBy:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, description, createdBy, createdAt]
+
+    IdeaSummary:
+      allOf:
+        - $ref: "#/components/schemas/Idea"
+        - type: object
+          properties:
+            votesCount:
+              type: integer
+            comments:
+              type: array
+              items:
+                $ref: "#/components/schemas/Comment"
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        ideaId:
+          type: integer
+        userId:
+          type: integer
+        message:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, ideaId, userId, message, createdAt]
+      example:
+        id: 1
+        ideaId: 1
+        userId: 1
+        message: "Concordo"
+        createdAt: "2025-10-18T12:00:00Z"
+
+    CommentWithUser:
+      allOf:
+        - $ref: "#/components/schemas/Comment"
+        - type: object
+          properties:
+            user:
+              $ref: "#/components/schemas/User"
+
+    IdeaFull:
+      allOf:
+        - $ref: "#/components/schemas/Idea"
+        - type: object
+          properties:
+            votes:
+              type: array
+              items:
+                $ref: "#/components/schemas/Vote"
+            comments:
+              type: array
+              items:
+                $ref: "#/components/schemas/CommentWithUser"
+            votesCount:
+              type: integer
+
+    Vote:
+      type: object
+      properties:
+        id:
+          type: integer
+        ideaId:
+          type: integer
+        userId:
+          type: integer
+      required: [id, ideaId, userId]
+      example:
+        id: 1
+        ideaId: 1
+        userId: 1
+
+    NewComment:
+      type: object
+      properties:
+        userId:
+          type: integer
+        message:
+          type: string
+      required: [userId, message]
+
+  securitySchemes: {}
+
+x-swagger-ui:
+  displayRequestDuration: true
+  tryItOutEnabled: true
+  docExpansion: none
