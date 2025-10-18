@@ -1,5 +1,11 @@
 # Ignore all node_modules directories
 node_modules/
 
+# Ignore all vendor directories
+vendor/
+
 # Ignore all dist directories
 dist/
+
+# Ignore environment variable files
+.env

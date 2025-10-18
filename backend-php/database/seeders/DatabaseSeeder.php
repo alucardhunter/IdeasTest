@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,7 +16,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('ideas')->insert([
-            ['title'=>'Produto A','description'=>'Descrição A','created_by'=>1,'created_at'=>now(),'updated_at'=>now()]
+            ['title'=>'Produto A','description'=>'Descrição A','createdBy'=>1,'created_at'=>now(),'updated_at'=>now()]
         ]);
     }
 }

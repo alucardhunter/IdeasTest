@@ -19,22 +19,22 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('createdBy')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
 
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idea_id')->constrained('ideas');
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('idea_id')->constrained('ideas')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->text('message');
             $table->timestamps();
         });
 
         Schema::create('votes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idea_id')->constrained('ideas');
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('idea_id')->constrained('ideas')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
             $table->unique(['idea_id','user_id']);
         });
