@@ -8,5 +8,10 @@ COPY . .
 RUN npx prisma generate || true
 # Run tests — if tests fail, build fails
 RUN npm test
+# Apply migrations
+RUN npx prisma migrate dev --name init
+# Seed database
+RUN npm run seed
+
 EXPOSE 4000
 CMD ["npm", "run", "dev"]

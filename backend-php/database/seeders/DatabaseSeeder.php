@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('ideas')->insert([
-            ['title'=>'Produto A','description'=>'Descrição A','createdBy'=>1,'created_at'=>now(),'updated_at'=>now()]
+            ['title'=>'Utilização de IA no dia a dia.','description'=>'Aplicação de ferramentas e processos utilizando IA para aumentar a produtividade da empresa.','createdBy'=>1,'created_at'=>now(),'updated_at'=>now()]
         ]);
     }
 }

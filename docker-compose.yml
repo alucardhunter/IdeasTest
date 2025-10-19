@@ -26,12 +26,6 @@ services:
       - postgres
     volumes:
       - ./backend-node:/app
-    command: >
-      sh -c "
-        npx prisma migrate deploy &&
-        npm run test &&
-        npm run dev
-      "
     
 
   backend-php:
@@ -54,12 +48,6 @@ services:
       - postgres
     volumes:
       - ./backend-laravel-mvc:/var/www/html
-    command: >
-      sh -c "
-        php artisan migrate --force &&
-        php artisan db:seed --force &&
-        php artisan serve --host=0.0.0.0 --port=8000
-      "
 
   frontend:
     build: ./frontend
