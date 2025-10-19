@@ -13,7 +13,7 @@ class IdeaController extends Controller
     public function index(): JsonResponse
     {
         // alias the count column to `votes_count` is default; we prefer `votesCount` in JSON
-        $ideas = Idea::withCount(['votes as votesCount'])->with('comments.user')->get()->sortByDesc('votesCount')->values();
+        $ideas = Idea::withCount(['votes as votesCount'])->with('comments.user', 'creator')->get()->sortByDesc('votesCount')->values();
         return response()->json($ideas);
     }
 
@@ -42,7 +42,7 @@ class IdeaController extends Controller
             $idea->votesCount = $idea->votes->count();
             return response()->json($idea);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error'=>'Idea not found'], 404);
+            return response()->json(['error'=>'Ideia não encontrada'], 404);
         }
     }
 
@@ -53,7 +53,7 @@ class IdeaController extends Controller
             $vote = Vote::create(['idea_id'=>$id,'user_id'=>$data['userId']]);
             return response()->json($vote, 201);
         } catch (\Illuminate\Database\QueryException $e) {
-            return response()->json(['error'=>'User already voted for this idea or invalid'], 400);
+            return response()->json(['error'=>'Usuário já votou nesta ideia ou requisição inválida!'], 400);
         }
     }
 
