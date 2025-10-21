@@ -1,17 +1,20 @@
-# Dockerfile - backend Node.js (runs tests during image build; build fails on test failures)
-FROM node:20-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
+FROM node:18-alpine3.16
+
+WORKDIR /usr/src/app
+
+RUN apk add --no-cache openssl
+
+COPY package.json package-lock.json ./
+
+
+RUN npm ci
+
 COPY . .
-# Generate prisma client (no DB required for mocked tests)
-RUN npx prisma generate || true
-# Run tests — if tests fail, build fails
-RUN npm test
-# Apply migrations
-RUN npx prisma migrate dev --name init
-# Seed database
-RUN npm run seed
+
+COPY docker-entrypoint.sh /usr/src/bin/docker-entrypoint.sh
+RUN chmod +x /usr/src/bin/docker-entrypoint.sh
 
 EXPOSE 4000
-CMD ["npm", "run", "dev"]
+
+ENTRYPOINT ["/usr/src/bin/docker-entrypoint.sh"]
+CMD ["sh", "-c", "npm run dev"]

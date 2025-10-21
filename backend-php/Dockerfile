@@ -1,21 +1,48 @@
 FROM php:8.3-fpm
 
-# install dependencies incl. pdo_pgsql and sqlite for phpunit
-RUN apt-get update && apt-get install -y libpq-dev libzip-dev zip unzip git curl sqlite3 libsqlite3-dev     && docker-php-ext-install pdo pdo_pgsql pdo_sqlite
+RUN apt-get update
+RUN apt-get -y install --fix-missing \
+  apt-utils \
+  build-essential \
+  git \
+  curl \
+  libcurl4 \
+  libcurl4-openssl-dev \
+  zlib1g-dev \
+  libzip-dev \
+  zip \
+  libbz2-dev \
+  locales \
+  libmcrypt-dev \
+  libicu-dev \
+  libonig-dev \
+  libxml2-dev
 
-# install composer
+RUN docker-php-ext-install \
+  exif \
+  pcntl \
+  bcmath \
+  ctype \
+  curl \
+  pcntl \
+  zip
+
+RUN apt-get install -y libpq-dev \
+  && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+  && docker-php-ext-install pdo pdo_pgsql pgsql
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
+
 COPY . .
 
-# install PHP dependencies (may fail if vendor not present; intended to be run in environment with composer available)
+# add entrypoint that clears config cache so runtime env vars are applied
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 RUN composer install --no-interaction --prefer-dist || true
 
-# run migrations & seed (requires DB available) and run phpunit (phpunit uses in-memory sqlite per phpunit.xml)
-RUN php artisan migrate --force || true
-RUN php artisan db:seed || true
-RUN ./vendor/bin/phpunit || (echo 'PHPUnit failed' && exit 1)
-
 EXPOSE 8000
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

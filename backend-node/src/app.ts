@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // serve swagger UI if swagger.yaml exists (swagger.yaml is in the repository root)
-const swaggerPath = path.join(__dirname, '..', '..', 'swagger.yaml');
+const swaggerPath = path.join(__dirname, '..', 'swagger.yaml');
 if (fs.existsSync(swaggerPath)) {
   const swaggerFile = fs.readFileSync(swaggerPath, 'utf8');
   const swaggerDoc = YAML.parse(swaggerFile);

@@ -1,62 +1,76 @@
-version: '3.8'
 services:
   postgres:
     image: postgres:16
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: product_ideas
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - prisma-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 2s
+      retries: 20
 
-  backend-node:
-    build:
-      context: ./backend-node
+  backend-node:    
+    build: 
+      context: ./backend-node 
       dockerfile: Dockerfile
     container_name: backend-node
     ports:
-      - "4000:4000"
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       - NODE_ENV=development
       - PORT=4000
       - DATABASE_URL=postgresql://postgres:123456@postgres:5432/product_ideas?schema=public
-    depends_on:
-      - postgres
-    volumes:
-      - ./backend-node:/app
-    
+    networks:
+      - prisma-network
 
   backend-php:
-    build: ./backend-php
-    dockerfile: Dockerfile
+    build: 
+      context: ./backend-php 
+      dockerfile: Dockerfile
     container_name: backend-php
     ports:
       - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
-      - APP_URL=http://localhost:8000
+      - APP_URL=http://localhost
       - DB_CONNECTION=pgsql
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_DATABASE=product_ideas
       - DB_USERNAME=postgres
       - DB_PASSWORD=123456
-    depends_on:
-      - postgres
     volumes:
-      - ./backend-laravel-mvc:/var/www/html
+      - ./backend-php:/var/www/html
+    networks:
+      - prisma-network 
 
   frontend:
-    build: ./frontend
-    environment:
-      VITE_API_BASE: http://localhost:4000
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE=http://localhost:4000
+    container_name: frontend
     ports:
-      - "5173:5173"
+      - "3000:3000"
     depends_on:
       - backend-node
-
-volumes:
-  postgres_data:
+    networks:
+      - prisma-network
+networks:
+  prisma-network:
+    name: prisma-network

@@ -6,6 +6,7 @@ export async function listIdeas(req: Request, res: Response) {
     include: {
       votes: true,
       comments: true,
+      creator: true
     }
   });
 
